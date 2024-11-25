@@ -6,121 +6,78 @@
 /*   By: juagomez <juagomez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 13:49:30 by juagomez          #+#    #+#             */
-/*   Updated: 2024/11/25 12:33:31 by juagomez         ###   ########.fr       */
+/*   Updated: 2024/11/25 22:20:51 by juagomez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-void	my_signal_Handler(int signum)
-{
-	printf("Signal number is %d", signum);
-	
-}
-
 int	main (int argc, char **argv)
 {	
 	int	pid_server;
 
+	(void)argv;
 	// VALIDACION ERRORES ARGUMENTOS 
 	if (argc != 1)
 	{
-		write(2, "Error\n", 6);
+		ft_putstr_fd("Error\n",2);
 		return (1);
-	}
+	}	
 	
-	// OBTENER PID SERVIDOR
-	pid_server = getpid();
-	printf("PID servidor -> %i \n", pid_server);
+	// TERMINAL SERVIDOR
+	pid_server = getpid(); // OBTENER PID SERVIDOR
 
-	// WRAPPER FUNCTION para manejar señales 	
-	//Signal(SIGUSR1, handler, true); // señal SIGUSR1 recibida -> bit 1
-	//Signal(SIGUSR2, handler, true); // señal SIGUSR2 recibida -> bit 0
-
-	// funcion signal -> sighandler_t signal(int signum, sighandler_t handler)
-	signal(29, &my_signal_Handler);
-
-	signal(SIGALRM, SIG_IGN); // ignorar señal cuando se recibe
-
+	ft_printf("---------------------------------\n");	
+	ft_printf("--------  MINITALK SERVER -------\n");
+	ft_printf("                                 \n");
+	ft_printf("          Server PID -> %i       \n", pid_server);	
+	ft_printf("                                 \n");	
+	ft_printf("---------------------------------\n");
+	ft_printf("---------------------------------\n");		
+	ft_printf("..........waiting for messages...\n");	
+	
 	// PROCESO ESCUCHA CONTINUA
 	while (1)
-	{
-		printf("esperando recibir señales \n");
+	{		
+		// WRAPPER FUNCTION para manejar señales 
+		// funcion signal -> sighandler_t signal(int signum, sighandler_t handler)	
+		signal(SIGUSR1, ft_btoa);
+		signal(SIGUSR2, ft_btoa);	
 		sleep(2);
-		//pause();
+		//pause();	
 	}
 	return (0);
 }
 
-/** 
-* @brief 
-* @param signum int:  .
-* @param info siginfo_t: Estructura de informacion asociada a una señal.
-* @param more_info void *: .
-* @returns void-> . 
-*/
-/* void handler(int signum, siginfo_t *info, void *more_info)
+void	ft_btoa(int signum)
 {
-	(void)	more_info;
+	static 	int	bits_position; // numero de bits recibidos		
+	// Almacena el valor del carácter construido a partir de los bits recibido
+	static	int	value; 
+	int bit_value;
 
-	write(STDOUT_FILENO, "hello", 5);
-	
-} */
-
-/** 
-* @brief Configura los manejadores de señales con informacion siginfo opcional
-para SIGUSR1 y SIGUSR2. Lógica:
--Se inicializa una estructura sigaction.
--Se establece handle_sig como el manejador de señales.
--Se configuran las banderas SA_RESTART y SA_SIGINFO.
--Se llama a sigaction para registrar los manejadores de SIGUSR1 y SIGUSR2.
--Si sigaction falla, el programa termina con exit(EXIT_FAILURE).  
-* @param signum int: Señal a manejar.
-* @param handler void *: Función handler que especifica la acción a realizar.
-* @param use_siginfo bool: Boleano para determinar si 'siginfo' es necesaria.
-* @returns void-> . 
-*/
-/* void    Signal(int signum, void *handler, bool use_siginfo)
-{
-	struct sigaction	sig_action_estructur = {0};
-
-	// COLOCAR FUNCION HANDLER DENTRO DE SIGACTION
-	if (use_siginfo)
+	//printf("Signal number is %d \n", signum);		
+	if (signum == SIGUSR1)  // entra un bit 1	
 	{
-		sig_action_estructur.sa_flags = SA_SIGINFO;
-		sig_action_estructur.sa_sigaction = handler;
-	}
-	else
-		sig_action_estructur.sa_handler = handler;
-
-	// BLOQUEAR 'SIGUSR1' MIENTRAS SE ESTÁ PROCESANDO 'SIGUSR2' y viceversa
-	// INICIALIZA SEÑALES DENTRO DEL ATRIBUTO 'MASK'
-	sigemptyset(&sig_action_estructur.sa_mask); 
-	// añadir señal bloqueada en ejecucion de funciopn handler
-	sigaddset(&sig_action_estructur.sa_mask, SIGUSR1); 
-	sigaddset(&sig_action_estructur.sa_mask, SIGUSR2);
-	
-    // VERIFIVCACION ERRORES activar funcion 'sigaction'
-	if (sigaction(signum, &sig_action_estructur, NULL) < 0)  // return -1 error
-	{
-		perror("Sigaction failed");
-		exit(1);
+		/* realiza una operación OR bit a bit (|=) entre value y el valor 
+		desplazado (<<). Establece el bit correspondiente en value sin alterar
+		los otros bits. */
+		bit_value = (0X01 << bits_position); // 0x01 -> valor hexadecimal de 1 -> binario 00000001
+		//print_bits(bit_value);
+		//printf("\n");
+		value = value | bit_value;   // operación OR bit a bit (|) entre value y el bit recibido y desplazado
+		//print_bits(value);
+		//printf("\n");
 	}	
-	else
-		sig_action_estructur.sa_handler = handler;
-
-	// BLOQUEAR 'SIGUSR1' MIENTRAS SE ESTÁ PROCESANDO 'SIGUSR2' y viceversa
-	// INICIALIZA SEÑALES DENTRO DEL ATRIBUTO 'MASK'
-	sigemptyset(&sig_action_estructur.sa_mask); 
-	// añadir señal bloqueada en ejecucion de funciopn handler
-	sigaddset(&sig_action_estructur.sa_mask, SIGUSR1); 
-	sigaddset(&sig_action_estructur.sa_mask, SIGUSR2);
+	print_bits(value);
+	ft_printf("\n bits_number -> %d \n", bits_position);
+	bits_position++; // se incrementa en cada llamada a la función.	
 	
-    // VERIFIVCACION ERRORES activar funcion 'sigaction'
-	if (sigaction(signum, &sig_action_estructur, NULL) < 0)  // return -1 error
-	{
-		perror("Sigaction failed");
-		exit(1);
-	}
-
-} */
+	if (bits_position == 8)
+	{ 	 
+		ft_printf("valor ascii -> %d \n", value); // valor ascii del caracter
+		ft_printf("caracter -> %c \n", value);
+		bits_position = 0; // reinicializacion de pack 8 bits
+		value = 0;		
+	}	
+}
