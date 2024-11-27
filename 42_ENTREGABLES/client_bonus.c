@@ -6,7 +6,7 @@
 /*   By: juagomez <juagomez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/26 13:31:19 by juagomez          #+#    #+#             */
-/*   Updated: 2024/11/27 21:14:21 by juagomez         ###   ########.fr       */
+/*   Updated: 2024/11/27 21:40:19 by juagomez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,23 +46,22 @@ static void	receive_confirmation_signals(int signal)
 {
 	static int	bit_position;
 	static int	value;
-	int			bit_value;
 
 	if (signal == SIGUSR1)
 	{
-		bit_value = (1 << bit_position);
-		value = value | bit_value;
+		value = value | (1 << bit_position);
+		ft_printf("1 ");
 	}
 	else if (signal == SIGUSR2)
 	{
-		bit_value = (0 << bit_position);
-		value = value | bit_value;
+		value = value | (0 << bit_position);
+		ft_printf("0 ");
 	}
 	bit_position++;
 	if (bit_position == 8)
 	{
 		if (value >= 32 && value <= 126)
-			ft_printf("< char received '%c' >\n", value);
+			ft_printf("< received '%c' >\n", value);
 		else
 			ft_printf("<<< received message >>>\n");
 		bit_position = 0;
