@@ -6,7 +6,7 @@
 /*   By: juagomez <juagomez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 13:49:40 by juagomez          #+#    #+#             */
-/*   Updated: 2024/11/27 20:06:30 by juagomez         ###   ########.fr       */
+/*   Updated: 2024/11/27 20:31:34 by juagomez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int	main(int argc, char **argv)
 	char	*message;
 	int		index;
 
-	index = 0;	
+	index = 0;
 	if (argc == 3)
 	{
 		server_pid = ft_atoi(argv[1]);
@@ -51,8 +51,8 @@ void	send_signals(int server_pid, char character)
 	//ft_printf("character bits -> \n");
 	//print_bits(character);
 	//ft_printf("\n");
-
-	bit_position = 0;	
+	
+	bit_position = 0;
 	while (bit_position < 8)
 	{
 		bit_value = (1 << bit_position);
@@ -68,9 +68,9 @@ void	send_signals(int server_pid, char character)
 		else
 		{
 			kill(server_pid, SIGUSR2); // bit 0
-			//ft_printf("bit 0 -> SIGUSR2 \n");			
-		}		
+			//ft_printf("bit 0 -> SIGUSR2 \n");
+		}
 		bit_position++;
 		usleep(300);
-	}	
+	}
 }

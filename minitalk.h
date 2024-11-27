@@ -6,7 +6,7 @@
 /*   By: juagomez <juagomez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 14:05:48 by juagomez          #+#    #+#             */
-/*   Updated: 2024/11/27 17:54:06 by juagomez         ###   ########.fr       */
+/*   Updated: 2024/11/27 20:12:09 by juagomez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,17 +15,17 @@
 
 /* EXTERNAL LIBRARIES */
 
-#include <unistd.h> // write / pause / usleep
-#include <signal.h> // signal
-#include <stdlib.h> // malloc free
+# include <unistd.h> // write / pause / usleep
+# include <signal.h> // signal
+# include <stdlib.h> // malloc free
 
 //#include <sys/types.h> // pid_t
 //#include <stdio.h> // printf
 
 /* OWN LIBRARIES */
 
-#include "./libft/libft.h"
-#include "./ft_printf/ft_printf.h"
+# include "./libft/libft.h"
+# include "./ft_printf/ft_printf.h"
 
 /* FUNCTIONS */
 
