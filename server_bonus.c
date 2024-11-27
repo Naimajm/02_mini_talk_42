@@ -1,71 +1,95 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server.c                                           :+:      :+:    :+:   */
+/*   server_bonus.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: juagomez <juagomez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/20 13:49:30 by juagomez          #+#    #+#             */
-/*   Updated: 2024/11/27 18:12:07 by juagomez         ###   ########.fr       */
+/*   Created: 2024/11/26 13:31:36 by juagomez          #+#    #+#             */
+/*   Updated: 2024/11/27 18:11:56 by juagomez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minitalk.h"
+#include "minitalk_bonus.h"
 
-int	main (int argc, char **argv)
-{	
+static void ft_signals_configuration(void);
+
+int	main(int argc, char **argv)
+{
 	int	server_pid;
 
-	(void)argv;
-	// TERMINAL SERVIDOR
+	(void)argv; // ignorar argumentos
+			
 	server_pid = getpid(); // OBTENER PID SERVIDOR
-
+	
 	// VALIDACION ERRORES ARGUMENTOS + PID SERVER 
 	if (argc != 1 || !server_pid)
 	{
 		ft_putstr_fd("Error\n",2);
 		return (1);
-	}	
-	// funcion signal -> sighandler_t signal(int signum, sighandler_t handler)	
-	signal(SIGUSR1, receive_signals);
-	signal(SIGUSR2, receive_signals);
-
+	}
 	// INTERFAZ CABECERA SERVER
 	ft_printf("---------------------------------\n");	
-	ft_printf("--------  MINITALK SERVER -------\n");
+	ft_printf("-----  BONUS MINITALK SERVER ----\n");
 	ft_printf("                                 \n");
 	ft_printf("          Server PID -> %i       \n", server_pid);	
 	ft_printf("                                 \n");	
 	ft_printf("---------------------------------\n");
 	ft_printf("---------------------------------\n");		
-	ft_printf("..........waiting for messages...\n");		
+	ft_printf("..........waiting for messages...\n");	
 
-	// PROCESO ESCUCHA CONTINUA
-	while (1)			
+	// Funcion manejadora señales. Recibe señal 'SIGUSR1' y 'SIGUSR2' 
+	ft_signals_configuration();	
+
+	while (1)
 		pause(); // suspender el proceso hasta que se reciba una señal.
 	return (0);
 }
 
-void	receive_signals(int signal)
+static void ft_signals_configuration(void)
+{
+	struct sigaction act;
+
+	// Configura los manejadores de señales para SIGUSR1 y SIGUSR2 utilizando sigaction.
+	act.sa_sigaction = receive_signals_and_confirm;
+	sigemptyset(&act.sa_mask);  // vaciar señales bloqueadas	
+	act.sa_flags = SA_SIGINFO;
+
+	// Funcion manejadora señales. Recibe señal 'SIGUSR1' y 'SIGUSR2' 
+	sigaction(SIGUSR1, &act, NULL);
+	sigaction(SIGUSR2, &act, NULL);
+}
+
+static void	send_confirmation_signal(int signal, siginfo_t *info)
+{
+	int client_pid;
+	
+	// ENVIO CONFIRMACION SEÑAL RECIBIDA
+	
+	client_pid = info->si_pid;
+	//printf("ID PROCESO CLIENTE -> client_pid -> %d / signal %d \n", info->si_pid, signal);
+	if (signal == SIGUSR1) // señal recibida es SIGUSR1
+		// Envía la señal SIGUSR1 de vuelta al proceso cuyo ID es info->si_pid
+		kill(client_pid, SIGUSR1); 
+	else if (signal == SIGUSR2) // señal recibida es SIGUSR2
+		kill(client_pid, SIGUSR2);
+}
+
+void	receive_signals_and_confirm(int signal, siginfo_t *info, void *context)
 {
 	static 	int	bit_position; // posicion actual del bit recibido		
-	// Almacena el valor del carácter construido a partir de los bits recibido
-	// cuando sea 1 byte, se convvertira en el codigo ASCII del caracter
+	// Almacena el valor del carácter construido a partir de los bits recibido.
 	static	int	value; 
 	int bit_value;
 
-	//printf("Signal number is %d \n", signum);		
+	(void)context; // ignorar argumento	
 	if (signal == SIGUSR1)  // entra un bit 1	
 	{
 		/* realiza una operación OR bit a bit (|) entre value y el valor 
 		desplazado (<<). Establece el bit correspondiente en value sin alterar
 		los otros bits. */
-		bit_value = (1 << bit_position); // 0x01 (1) -> valor hexadecimal de 1 -> binario 00000001
-		//print_bits(bit_value);
-		//printf("\n");
+		bit_value = (1 << bit_position);
 		value = value | bit_value;   // operación OR bit a bit (|) entre value y el bit recibido y desplazado
-		//print_bits(value);
-		//printf("\n");
 	}	
 	else if (signal == SIGUSR2)
     {
@@ -76,11 +100,14 @@ void	receive_signals(int signal)
 	//ft_printf("\n bit_position -> %d \n", bits_position);
 	bit_position++; // se incrementa en cada llamada a la función.	
 	
-	if (bit_position == 8)
-	{ 	 
+	if (bit_position == 8)	{ 	
 		//ft_printf("valor ascii -> %d \n", value); // valor ascii del caracter
 		ft_printf("%c", value);
 		bit_position = 0; // reinicializacion de pack 8 bits
 		value = 0;		
-	}	
+	}		
+	// ENVIO CONFIRMACION SEÑAL RECIBIDA
+	//printf("ID PROCESO CLIENTE -> client_pid -> %d / signal %d \n", info->si_pid, signal);
+	send_confirmation_signal(signal, info);
 }
+

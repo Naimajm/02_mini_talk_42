@@ -9,3 +9,5 @@ https://www.youtube.com/watch?v=MtqFZRXaeM0&list=PLn9-gi1mj5U7K_Ke9N3uqOFdzNnHUp
 
 ### CONCEPTOS
 operaciones con bits ->  https://es.wikipedia.org/wiki/Operador_a_nivel_de_bits
+
+Tabla caracteres Unicode -> https://symbl.cc/es/unicode-table/
